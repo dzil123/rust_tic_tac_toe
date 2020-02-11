@@ -48,6 +48,11 @@ mod board {
                 None
             }
         }
+
+        pub fn from_num(num: u8) -> Option<Position> {
+            let num = num.checked_sub(1)?;
+            Position::new((num % 3).into(), (num / 3).into())
+        }
     }
 
     impl fmt::Display for Position {
@@ -131,6 +136,10 @@ mod board {
         pub fn print(&self) {
             println!("{}", self);
         }
+
+        pub fn print_positions() {
+            println!("[[1, 2, 3],\n [4, 5, 6],\n [7, 8, 9]]");
+        }
     }
 
     impl Display for Board {
@@ -152,9 +161,60 @@ mod board {
     }
 }
 
-use board::{Board, Opponent, Position};
 
-fn main() {
+mod input {
+    use super::board::{Board, Position};
+    use std::io::{self, Write};
+
+    pub trait MoveInput {
+        fn get_move(&self, board: &Board) -> Position;
+    }
+
+    #[derive(Debug)]
+    pub struct User {
+        pub name: String,
+    }
+
+    impl MoveInput for User {
+        fn get_move(&self, board: &Board) -> Position {
+            println!("It is {}'s turn", self.name);
+            println!("Here is the board:");
+            board.print();
+            println!("Input your move (1-9):");
+            Board::print_positions();
+
+            loop {
+                print!("> ");
+                io::stdout().flush().unwrap();
+                let mut pos = String::new();
+                io::stdin()
+                    .read_line(&mut pos)
+                    .expect("Failed to read line");
+
+                let pos = match pos.trim().parse() {
+                    Ok(x) => x,
+                    Err(_) => {
+                        println!("Invalid input: not a number");
+                        continue;
+                    }
+                };
+
+                match Position::from_num(pos) {
+                    Some(x) => break x,
+                    None => {
+                        println!("Invalid input: needs to be between 1 - 9");
+                        continue;
+                    }
+                }
+            }
+        }
+    }
+}
+
+use board::{Board, Opponent, Position};
+use input::{MoveInput, User};
+
+fn test_board() {
     let mut x = Board::new();
     x.print();
 
@@ -180,4 +240,13 @@ fn main() {
 
     x.print();
     println!("{}", x[Position::new(2, 0).unwrap()]);
+}
+
+fn main() {
+    let board = Board::new();
+    let bob = User {
+        name: "Bob".to_string(),
+    };
+    let pos = bob.get_move(&board);
+    println!("\nYou have chosen position: {}", pos);
 }
