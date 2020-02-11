@@ -1,150 +1,183 @@
-mod logic {
-    use std;
+mod board {
     use std::fmt::{self, Display, Formatter};
+    use std::ops::{Index, IndexMut};
 
-    pub use board::*;
-    use error::*;
-    pub use opponent::*;
-    pub use position::*;
 
-    mod opponent {
-        use super::*;
-
-        #[derive(Debug, Clone, Copy)]
-        pub enum Opponent {
-            X,
-            O,
-        }
-
-        #[derive(Debug, Clone, Copy)]
-        pub struct OpponentSpot(pub Option<Opponent>);
-
-        impl Display for OpponentSpot {
-            fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-                write!(
-                    f,
-                    "{}",
-                    match self.0 {
-                        Some(Opponent::X) => "X",
-                        Some(Opponent::O) => "O",
-                        None => "_",
-                    }
-                )
-            }
-        }
+    #[derive(Debug, Clone, Copy)]
+    pub enum Opponent {
+        X,
+        O,
     }
 
-    mod position {
-        use super::*;
+    #[derive(Debug, Clone, Copy)]
+    pub struct OpponentSpot(pub Option<Opponent>);
 
-        #[derive(Debug, Clone, Copy)]
-        pub struct Position(pub(super) usize, pub(super) usize);
-
-        impl Position {
-            pub fn new(x: usize, y: usize) -> Option<Position> {
-                if (0..3).contains(&x) && (0..3).contains(&y) {
-                    Some(Position(x, y))
-                } else {
-                    None
+    impl Display for OpponentSpot {
+        fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+            write!(
+                f,
+                "{}",
+                match self.0 {
+                    Some(Opponent::X) => "X",
+                    Some(Opponent::O) => "O",
+                    None => "_",
                 }
-            }
+            )
         }
+    }
 
-        impl fmt::Display for Position {
-            fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-                write!(f, "({}, {})", self.0, self.1)
+
+    #[derive(Debug, Clone, Copy)]
+    pub struct Position(usize, usize);
+
+    impl Position {
+        pub const POS_00: Position = Position(0, 0);
+        pub const POS_01: Position = Position(0, 1);
+        pub const POS_02: Position = Position(0, 2);
+        pub const POS_10: Position = Position(1, 0);
+        pub const POS_11: Position = Position(1, 1);
+        pub const POS_12: Position = Position(1, 2);
+        pub const POS_20: Position = Position(2, 0);
+        pub const POS_21: Position = Position(2, 1);
+        pub const POS_22: Position = Position(2, 2);
+
+        pub fn new(x: usize, y: usize) -> Option<Position> {
+            if (0..3).contains(&x) && (0..3).contains(&y) {
+                Some(Position(x, y))
+            } else {
+                None
             }
         }
     }
 
-    mod error {
-        use super::*;
-
-        #[derive(Debug)]
-        pub struct PositionTakenError {
-            pub(super) pos: Position,
-            pub(super) opponent: OpponentSpot,
+    impl fmt::Display for Position {
+        fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+            write!(f, "({}, {})", self.0, self.1)
         }
-
-        impl fmt::Display for PositionTakenError {
-            fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-                write!(
-                    f,
-                    "Position {} is already taken by '{}'",
-                    self.pos, self.opponent
-                )
-            }
-        }
-
-        impl std::error::Error for PositionTakenError {}
-
-        pub type SetResult = std::result::Result<(), PositionTakenError>;
     }
 
-    mod board {
-        use super::*;
 
-        #[derive(Debug)]
-        pub struct Board([[OpponentSpot; 3]; 3]);
+    #[derive(Debug)]
+    pub struct PositionTakenError {
+        pos: Position,
+        opponent: OpponentSpot,
+    }
 
-        impl Board {
-            pub fn new() -> Board {
-                Board([[OpponentSpot(None); 3]; 3])
-            }
+    impl fmt::Display for PositionTakenError {
+        fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+            write!(
+                f,
+                "Position {} is already taken by '{}'",
+                self.pos, self.opponent
+            )
+        }
+    }
 
-            pub fn get(&self, pos: Position) -> OpponentSpot {
-                self.0[pos.0][pos.1]
-            }
+    impl std::error::Error for PositionTakenError {}
 
-            // pub fn taken(&self, pos: &Position) -> bool {
-            //     self.0.get(10);
-            //     match self.get(pos) {
-            //         OpponentSpot(None) => false,
-            //         _ => true,
-            //     }
-            // }
+    pub type SetBoardResult = std::result::Result<(), PositionTakenError>;
 
-            pub fn set(&mut self, pos: Position, opponent: Opponent) -> SetResult {
-                match self.get(pos) {
-                    OpponentSpot(None) => {
-                        self.0[pos.0][pos.1] = OpponentSpot(Some(opponent));
-                        SetResult::Ok(())
-                    }
-                    opponent => SetResult::Err(PositionTakenError { pos, opponent }),
+
+    #[derive(Debug)]
+    struct BoardImpl([[OpponentSpot; 3]; 3]);
+
+    impl BoardImpl {
+        fn new() -> BoardImpl {
+            BoardImpl([[OpponentSpot(None); 3]; 3])
+        }
+    }
+
+    impl Index<Position> for BoardImpl {
+        type Output = OpponentSpot;
+
+        fn index(&self, pos: Position) -> &Self::Output {
+            &self.0[pos.0][pos.1]
+        }
+    }
+
+    impl IndexMut<Position> for BoardImpl {
+        fn index_mut(&mut self, pos: Position) -> &mut Self::Output {
+            &mut self.0[pos.0][pos.1]
+        }
+    }
+
+
+    #[derive(Debug)]
+    pub struct Board(BoardImpl);
+
+    impl Index<Position> for Board {
+        type Output = OpponentSpot;
+
+        fn index(&self, pos: Position) -> &Self::Output {
+            &self.0[pos]
+        }
+    }
+
+    impl Board {
+        pub fn new() -> Board {
+            Board(BoardImpl::new())
+        }
+
+        pub fn set(&mut self, pos: Position, opponent: Opponent) -> SetBoardResult {
+            match self[pos] {
+                OpponentSpot(None) => {
+                    self.0[pos] = OpponentSpot(Some(opponent));
+                    SetBoardResult::Ok(())
                 }
-            }
-
-            pub fn print(&self) {
-                println!("{}", self);
+                opponent => SetBoardResult::Err(PositionTakenError { pos, opponent }),
             }
         }
 
-        impl Display for Board {
-            fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-                write!(
-                    f,
-                    "[[{}, {}, {}],\n [{}, {}, {}],\n [{}, {}, {}]]",
-                    self.0[0][0],
-                    self.0[0][1],
-                    self.0[0][2],
-                    self.0[1][0],
-                    self.0[1][1],
-                    self.0[1][2],
-                    self.0[2][0],
-                    self.0[2][1],
-                    self.0[2][2]
-                )
-            }
+        pub fn print(&self) {
+            println!("{}", self);
+        }
+    }
+
+    impl Display for Board {
+        fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+            write!(
+                f,
+                "[[{}, {}, {}],\n [{}, {}, {}],\n [{}, {}, {}]]",
+                self[Position::POS_00],
+                self[Position::POS_01],
+                self[Position::POS_02],
+                self[Position::POS_10],
+                self[Position::POS_11],
+                self[Position::POS_12],
+                self[Position::POS_20],
+                self[Position::POS_21],
+                self[Position::POS_22]
+            )
         }
     }
 }
 
-use logic::*;
+use board::{Board, Opponent, Position};
 
 fn main() {
     let mut x = Board::new();
     x.print();
-    x.set(Position::new(2, 0).unwrap(), Opponent::X).unwrap();
-    x.set(Position::new(1, 1).unwrap(), Opponent::O).unwrap();
+
+    println!("{}", x[Position::POS_20]);
+    x.set(Position::POS_20, Opponent::X).unwrap();
+    x.set(Position::POS_11, Opponent::O).unwrap();
+
+
+    // Expect PositionTakenError: print nice error message
+    println!(
+        "{}, as expected",
+        x.set(Position::POS_11, Opponent::X).unwrap_err() // Should not panic
+    );
+
+    // Expect None from invalid index
+    match Position::new(10, 0) {
+        Some(_) => panic!("Unexpected Some"), // Should not panic
+        None => println!("Invalid Index, as expected"),
+    }
+
+    // x[Position::new(2, 0).unwrap()] = OpponentSpot(None); // Does not compile, as expected
+
+
     x.print();
+    println!("{}", x[Position::new(2, 0).unwrap()]);
 }
