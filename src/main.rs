@@ -22,7 +22,7 @@ fn test_board() {
     // Expect None from invalid index
     match Position::new(10, 0) {
         Some(_) => panic!("Unexpected Some"), // Should not panic
-        None => println!("Invalid Index, as expected"),
+        None => println!("Invalid index, as expected"),
     }
 
     // x[Position::new(2, 0).unwrap()] = OpponentSpot(None); // Does not compile, as expected
