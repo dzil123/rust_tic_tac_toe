@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block scripts %}
+<script type="text/javascript" src="scripts/zoom.js" defer></script>
+<script type="text/javascript" src="scripts/mikenode.js" defer></script>
+<script type="text/javascript" src="scripts/node.js" defer></script>
+{% endblock %}
+
+{% block content %}
+<canvas id="canvas"></canvas>
+<div id="container">
+</div>
+
+<div id="menu-container">
+    <h1>Nodes</h1>
+    <div id="menu-container-modules"></div>
+</div>
+
+<div class="status-indicator-group">
+    <div class="status-content"></div>
+    <div class="status-indicator status-dropdown">
+        <img class="status-indicator-icon status-indicator-cross" src="icons/cross.svg">
+        <img class="status-indicator-icon status-indicator-spinner fa-pulse" src="icons/spinner.svg">
+        <img class="status-indicator-icon status-indicator-check" src="icons/check.svg">
+    </div>
+</div>
+{% endblock %}

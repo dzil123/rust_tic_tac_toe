@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+
+{% block scripts %}
+<script type="text/javascript" src="scripts/settings.js" defer></script>
+<script type="text/javascript" src="libs/bfi.min.js" defer></script>
+{% endblock %}
+
+{% block content %}
+<div id="prefs-container">
+    {% if daemon %}
+    <div class="preference" style="width: 430px;">
+        <h2>Update</h2>
+        <p>
+            <a href="https://opensight-cv.github.io/quickstart/upgrading/">Click here</a>
+            for a tutorial on updating.
+        </p>
+        <form id="update-form" enctype="multipart/form-data" method="post" name="update-form">
+            <input type="file" class="bfi" required />
+        </form>
+        <input id="update-button" type="button" value="Update" />
+    </div>
+    {% endif %}
+    <div class="preference">
+        <h2>Import/Export</h2>
+        <form id="import-form" enctype="multipart/form-data" method="post" name="import-form">
+            <input type="file" class="bfi" required />
+        </form>
+        <input id="import-button" type="button" value="Import" />
+        <input id="export-button" type="button" value="Export" />
+    </div>
+    <div class="preference">
+        <h2>Import Camera Calibration</h2>
+        <form id="import-calibration-form" enctype="multipart/form-data" method="post" name="import-form">
+            <input type="file" class="bfi" required />
+        </form>
+        <input id="import-calibration-button" type="button" value="Import" />
+    </div>
+    <div class="preference network-settings">
+        <h2>Network Config</h2>
+        <div id="net-normal-settings">
+            <h3>General</h3>
+            <label for="team-number">Team Number:</label>
+            <input id="team-number" type="number" min="1" max="9999" step="1" required
+                value="{{persist.network.team | int}}" />
+            <br>
+            <label for="dns-mode">DNS Mode:</label>
+            <select id="dns-mode">
+                {% for name, value in persist.network.mode.__class__.__members__.items() %}
+                <option value="{{ name }}" {{ "selected" if persist.network.mode == value }}>{{ name }}</option>
+                {% endfor %}
+            </select>
+            <br>
+        </div>
+        {% if netconf %}
+        <div id="net-pi-settings">
+            <label for="ip-assign">IP Assignment Mode:</label>
+            <select id="ip-assign">
+                <option value="DHCP" {{"selected" if persist.network.dhcp}}>DHCP</option>
+                <option value="Static" {{"selected" if not persist.network.dhcp}}>Static</option>
+            </select>
+            <br>
+            <div id="static-ext-div">
+            <label for="static-ext">Static IP Extension:</label>
+            <input id="static-ext" type="number" min="2" max="255" step="1" required
+                value="{{persist.network.static_ext | int}}" />
+            <br>
+            </div>
+        </div>
+        {% endif %}
+        {% if nt %}
+        <div id="net-nt-settings">
+            <h3>NetworkTables</h3>
+            <label for="nt-enabled">Enabled:</label>
+            <input id="nt-enabled" type="checkbox" {{"checked" if persist.network.nt_enabled}} />
+            <br>
+            <label for="nt-mode">NetworkTables Mode:</label>
+            <select id="nt-mode">
+                <option value="client" {{"selected" if persist.network.nt_client}}>Client</option>
+                <option value="server" {{"selected" if not persist.network.nt_client}}>Server</option>
+            </select>
+        </div>
+        {% endif %}
+        <input id="network-button" type="button" value="Submit" />
+    </div>
+    <div class="preference">
+        <h2>Profiles</h2>
+        <p>Current profile: {{persist.profile}}</p>
+        <input class="profile-button" type="button" value="0" />
+        <input class="profile-button" type="button" value="1" />
+        <input class="profile-button" type="button" value="2" />
+        <input class="profile-button" type="button" value="3" />
+        <input class="profile-button" type="button" value="4" />
+        <br>
+        <input class="profile-button" type="button" value="5" />
+        <input class="profile-button" type="button" value="6" />
+        <input class="profile-button" type="button" value="7" />
+        <input class="profile-button" type="button" value="8" />
+        <input class="profile-button" type="button" value="9" />
+        <br>
+        <input id="delete-button" type="button" value="Delete selected profile" />
+    </div>
+    <div class="preference">
+        <h2>Actions</h2>
+        {% if daemon %}
+        <input id="restart" type="button" value="Restart OpenSight" />
+        <input id="restart-host" type="button" value="Restart System" />
+        <input id="shutdown-host" type="button" value="Shutdown System" />
+        {% else %}
+        <input id="restart" type="button" value="Restart OpenSight" />
+        <input id="shutdown" type="button" value="Stop OpenSight" />
+        {% endif %}
+    </div>
+</div>
+<span class="version-display">Version {{version}}</span>
+<div class="status-indicator-group">
+    <div class="status-content"></div>
+    <div class="status-indicator status-dropdown">
+        <img class="status-indicator-icon status-indicator-cross" src="icons/cross.svg">
+        <img class="status-indicator-icon status-indicator-spinner fa-pulse" src="icons/spinner.svg">
+        <img class="status-indicator-icon status-indicator-check" src="icons/check.svg">
+    </div>
+</div>
+{% endblock %}

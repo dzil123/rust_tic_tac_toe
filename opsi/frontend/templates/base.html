@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+
+<!-- This project uses Font Awesome icons, as seen on the left navigation bar. -->
+<!-- Font Awesome is licensed under Creative Commons Attribution 4.0. -->
+<!-- You can find the details of this license here: https://fontawesome.com/license/free -->
+<!-- Some icons have been modified to add a fill color, stroke color and width, and/or modify viewbox. -->
+
+<html lang="en">
+
+<head>
+	<title>OpenSight</title>
+
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<meta http-equiv="X-UA-Compatible" content="ie=edge" />
+
+	<link rel="stylesheel" href="styles/normalize.css" />
+	<link rel="stylesheet" href="styles/ui.css" />
+	<link rel="stylesheet" href="styles/node.css" />
+
+	<link rel="icon" type="image/png" sizes="192x192" href="favicon/favicon-192x192.png">
+	<link rel="icon" type="image/png" sizes="32x32" href="favicon/favicon-32x32.png">
+	<link rel="icon" type="image/png" sizes="96x96" href="favicon/favicon-96x96.png">
+	<link rel="icon" type="image/png" sizes="16x16" href="favicon/favicon-16x16.png">
+
+	<script type="text/javascript" src="libs/jquery-3.4.1.min.js" defer></script>
+	<script type="text/javascript" src="libs/jquery-ui-1.12.1.min.js" defer></script>
+	{% block scripts %}{% endblock %}
+</head>
+
+<body id="body">
+	<div id="nav" class="">
+		<a href="/" class="">
+			<div ondragstart="return false;" ondrop="return false;" class="navContainer"><img class="navItem"
+					src="icons/grid.svg" alt=""></div>
+		</a>
+		<a href="/settings" class="">
+			<div ondragstart="return false;" ondrop="return false;" class="navContainer"><img class="navItem"
+					src="icons/cog.svg" alt=""></div>
+		</a>
+		<a href="/hooks" class="">
+			<div ondragstart="return false;" ondrop="return false;" class="navContainer"><img class="navItem"
+					src="icons/puzzle.svg" alt="" style="padding-left: 3px;"></div>
+		</a>
+	</div>
+
+	{% block content %}{% endblock %}
+
+</body>
+
+</html>
